@@ -34,7 +34,18 @@ fi
 # Check if the "vaila" environment already exists
 if conda info --envs | grep -q "^vaila"; then
     echo "Conda environment 'vaila' already exists. Updating..."
-    conda env update -f yaml_for_conda_env/vaila_mac.yaml --prune
+   
+    arch=$(uname -m)
+   
+    if [ "${arch}" == "arm64" ]; then
+        conda env update -f yaml_for_conda_env/vaila_mac.yaml --prune
+    elif [ "${arch}" == "x86_64" ]; then
+        conda env update -f yaml_for_conda_env/vaila_mac_intel.yaml --prune
+    else
+        echo "Unknown architecture: ${arch}"
+        exit 1
+    fi
+    
     if [ $? -eq 0 ]; then
         echo "'vaila' environment updated successfully."
     else
@@ -42,8 +53,20 @@ if conda info --envs | grep -q "^vaila"; then
         exit 1
     fi
 else
-    echo "Creating Conda environment from vaila_mac.yaml..."
-    conda env create -f yaml_for_conda_env/vaila_mac.yaml
+    
+    arch=$(uname -m)
+
+    if [ "${arch}" == "arm64" ]; then
+        echo "Creating Conda environment from vaila_mac.yaml..."
+        conda env create -f yaml_for_conda_env/vaila_mac.yaml
+    elif [ "${arch}" == "x86_64" ]; then
+        echo "Creating Conda environment from vaila_mac_intel.yaml..."
+        conda env create -f yaml_for_conda_env/vaila_mac_intel.yaml
+    else
+        echo "Unknown architecture: ${arch}"
+        exit 1
+    fi
+
     if [ $? -eq 0 ]; then
         echo "'vaila' environment created successfully on macOS."
     else
